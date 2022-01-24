@@ -16,6 +16,10 @@ on:
   pull_request:
     branches: [ master ]
 
+concurrency:
+  group:  ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   run-build-job:
     runs-on: ubuntu-18.04
@@ -153,5 +157,3 @@ jobs:
           ./update_gh_pages.sh
         env:
           GITHUB_TOKEN: ${{ secrets.NEW_SECRET }}
-
-          
