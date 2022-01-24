@@ -17,7 +17,7 @@ on:
     branches: [ master ]
 
 concurrency:
-  group: environment-${{ github.ref }}
+  group:  ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -158,4 +158,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.NEW_SECRET }}
 
-          
+
