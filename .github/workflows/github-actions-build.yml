@@ -68,7 +68,6 @@ jobs:
           make dependencies
           
       - name: Prepare for GO helm unit tests
-        if: always()
         run: |
           mkdir $GITHUB_WORKSPACE/terratest/bin
           export GOPATH=$GITHUB_WORKSPACE/terratest
@@ -82,7 +81,6 @@ jobs:
           # go test test/addons | grep "FAIL" -A 8 ; test ${PIPESTATUS[0]} -eq 0
       
       - name: run go tests on pega
-        if: always()
         run: |
           export GOPATH=$GITHUB_WORKSPACE/terratest
           export PATH=$PATH:$GITHUB_WORKSPACE/terratest/bin
@@ -90,7 +88,6 @@ jobs:
           go test test/pega | grep "FAIL" -A 8 || true ; test ${PIPESTATUS[0]} -eq 0
 
       - name: run go tests on addons
-        if: always()
         run: |
           export GOPATH=$GITHUB_WORKSPACE/terratest
           export PATH=$PATH:$GITHUB_WORKSPACE/terratest/bin
@@ -98,7 +95,6 @@ jobs:
           go test test/addons | grep "FAIL" -A 8 || true ; test ${PIPESTATUS[0]} -eq 0
 
       - name: run go tests on backing services
-        if: always()
         run: |
           export GOPATH=$GITHUB_WORKSPACE/terratest
           export PATH=$PATH:$GITHUB_WORKSPACE/terratest/bin
