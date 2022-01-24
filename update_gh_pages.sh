@@ -29,6 +29,7 @@ cd "$tmp_build_dir"
 echo "Copying the files to the temporary build directory"
 rsync -rl --exclude .git --delete "$GITHUB_WORKSPACE/" .
 
+git restore linux-amd64/
 echo $(pwd)
 ls
 git branch
