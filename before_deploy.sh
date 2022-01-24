@@ -8,7 +8,6 @@ then
     tagVersion = ${GITHUB_REF_NAME}
 fi
 export CHART_VERSION=$(expr ${tagVersion:1})
-#export CHART_VERSION="2.2.1"
 export PEGA_FILE_NAME=pega-${CHART_VERSION}.tgz
 export ADDONS_FILE_NAME=addons-${CHART_VERSION}.tgz
 export BACKINGSERVICES_FILE_NAME=backingservices-${CHART_VERSION}.tgz
