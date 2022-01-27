@@ -4,11 +4,11 @@ global:
   # each configuration option, see the project readme.
 
   # Enter your Kubernetes provider.
-  provder: "YOUR_KUBERNETES_PROVIDER"
+  provider: "YOUR_KUBERNETES_PROVIDER"
 
-  deploment:
+  deployment:
     # The name specified will be used to prefix all of the Pega pods (replacing "pega" with something like "app1-dev").
-    name: "pega"}
+    name: "pega"
 
   # Deploy Pega nodes
   actions:
