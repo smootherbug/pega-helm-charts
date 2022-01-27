@@ -117,8 +117,7 @@ jobs:
   run-deploy-job:
     runs-on: ubuntu-18.04
     needs: [run-lint-job, run-remark-job, run-go-tests-job]
-    if: github.event_name != 'pull_request'
-    if: ${{ success() }}
+    if: github.event_name != 'pull_request' && ${{ success() }}
     steps:
       - name: Install Helm
         run: |
