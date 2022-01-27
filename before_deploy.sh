@@ -7,9 +7,6 @@ if [ ${GITHUB_REF_TYPE} == "tag" ]
 then
     tagVersion=${GITHUB_REF_NAME}
 fi
-echo $tagVersion
-echo ${GITHUB_REF_TYPE}
-echo ${GITHUB_REF_NAME}
 export CHART_VERSION=$(expr ${tagVersion:1})
 export PEGA_FILE_NAME=pega-${CHART_VERSION}.tgz
 export ADDONS_FILE_NAME=addons-${CHART_VERSION}.tgz
