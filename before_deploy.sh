@@ -2,7 +2,7 @@
 
 # CHART_VERSION is computed from the TAG details of the commit. Every Github release creates tag with the release name.
 # Release name (or) Tag name should be in vX.X.X format. Helm CHART_VERSION would be X.X.X
-tagVersion = ""
+tagVersion=""
 if [ ${GITHUB_REF_TYPE} == "tag" ]
 then
     tagVersion = ${GITHUB_REF_NAME}
