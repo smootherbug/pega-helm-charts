@@ -4,20 +4,28 @@
 {{- $depName -}}-environment-config
 {{- end }}
 
-{{- define "pegaImportCertificatesConfig" }}
+{{- define "pegaImportCertificatesSecret" }}
 {{- $depName := printf "%s" (include "deploymentName" $) -}}
-{{- $depName -}}-import-certificates-config
+{{- $depName -}}-import-certificates-secret
 {{- end }}
 
 {{- define "pegaVolumeImportCertificates" }}pega-volume-import-certificates{{- end }}
 
 {{- define "pegaImportCertificatesTemplate" }}
 - name: {{ template "pegaVolumeImportCertificates" }}
-  configMap:
-    # This name will be referred in the volume mounts kind.
-    name: {{ template "pegaImportCertificatesConfig" $ }}
-    # Used to specify permissions on files within the volume.
+  projected:
     defaultMode: 420
+    sources:
+  {{ if (.Values.global.certificatesSecrets) }}
+  {{- range .Values.global.certificatesSecrets }}
+    - secret:
+        name: {{ . }}
+  {{- end }}
+  {{ else }}
+    # This name will be referred in the volume mounts kind.
+    - secret:
+        name: {{ template "pegaImportCertificatesSecret" $ }}
+  {{ end }}
 {{- end}}
 
 {{- define "pegaCustomArtifactoryCertificateConfig" }}
@@ -302,7 +310,11 @@ until cqlsh -u {{ $cassandraUser | quote }} -p {{ $cassandraPassword | quote }} 
 {{- end }}
 
 {{- define "gkemanagedcertificate" }}
+{{- if (semverCompare ">= 1.19.0-0" (trimPrefix "v" .root.Capabilities.KubeVersion.GitVersion)) }}
+apiVersion: networking.gke.io/v1
+{{- else }}
 apiVersion: networking.gke.io/v1beta1
+{{- end }}
 kind: ManagedCertificate
 metadata:
   name: {{ .name }}
@@ -351,9 +363,25 @@ true
     sources:
     - secret:
         name: {{ template "pegaCredentialsSecret" $ }}
-  {{ if and (.Values.global.jdbc.external_secret_name) (not .Values.global.jdbc.password) }}
+  {{ if ((.Values.global.jdbc).external_secret_name) }}
     - secret:
         name: {{ .Values.global.jdbc.external_secret_name }}
+  {{- end }}
+  {{ if ((.Values.hazelcast).external_secret_name)}}
+    - secret:
+        name: {{ .Values.hazelcast.external_secret_name }}
+  {{- end }}
+  {{ if ((.Values.global.customArtifactory.authentication).external_secret_name) }}
+    - secret:
+        name: {{ .Values.global.customArtifactory.authentication.external_secret_name }}
+  {{- end }}
+  {{ if ((.Values.dds).external_secret_name)}}
+    - secret:
+        name: {{ .Values.dds.external_secret_name }}
+  {{- end }}
+  {{ if ((.Values.stream).external_secret_name)}}
+    - secret:
+        name: {{ .Values.stream.external_secret_name }}
   {{- end }}
 {{- end}}
 
@@ -375,7 +403,7 @@ dnsConfig:
 {{- end -}}
 
 {{- define "ingressApiVersion" }}
-{{- if (semverCompare ">= 1.22.0-0" (trimPrefix "v" .root.Capabilities.KubeVersion.GitVersion)) }}
+{{- if (semverCompare ">= 1.19.0-0" (trimPrefix "v" .root.Capabilities.KubeVersion.GitVersion)) }}
 apiVersion: networking.k8s.io/v1
 {{- else }}
 apiVersion: extensions/v1beta1
@@ -383,7 +411,7 @@ apiVersion: extensions/v1beta1
 {{- end }}
 
 {{- define "ingressService" }}
-{{- if (semverCompare ">= 1.22.0-0" (trimPrefix "v" .root.Capabilities.KubeVersion.GitVersion)) }}
+{{- if (semverCompare ">= 1.19.0-0" (trimPrefix "v" .root.Capabilities.KubeVersion.GitVersion)) }}
 service:
   name: {{ .name }}
   port: 
@@ -395,7 +423,7 @@ servicePort: {{ .node.service.port }}
 {{- end }}
 
 {{- define "ingressServiceHttps" }}
-{{- if (semverCompare ">= 1.22.0-0" (trimPrefix "v" .root.Capabilities.KubeVersion.GitVersion)) }}
+{{- if (semverCompare ">= 1.19.0-0" (trimPrefix "v" .root.Capabilities.KubeVersion.GitVersion)) }}
 service:
   name: {{ .name }}
   port:
@@ -415,7 +443,7 @@ servicePort: {{ .node.service.tls.port }}
 {{- end }}
 
 {{- define "ingressServiceC11n" }}
-{{- if (semverCompare ">= 1.22.0-0" (trimPrefix "v" .root.Capabilities.KubeVersion.GitVersion)) }}
+{{- if (semverCompare ">= 1.19.0-0" (trimPrefix "v" .root.Capabilities.KubeVersion.GitVersion)) }}
 service:
   name: constellation
   port: 
@@ -427,7 +455,7 @@ servicePort: 3000
 {{- end }}
 
 {{- define "ingressServiceSSLRedirect" }}
-{{- if (semverCompare ">= 1.22.0-0" (trimPrefix "v" .root.Capabilities.KubeVersion.GitVersion)) }}
+{{- if (semverCompare ">= 1.19.0-0" (trimPrefix "v" .root.Capabilities.KubeVersion.GitVersion)) }}
 service:
   name: ssl-redirect
   port: 
@@ -437,3 +465,19 @@ serviceName: ssl-redirect
 servicePort: use-annotation
 {{- end }}
 {{- end }}
+
+{{- define "tierClassloaderRetryTimeout" }}
+{{- if gt (add .periodSeconds 0) 180 -}}
+180
+{{- else -}}
+{{- add .periodSeconds 0}}
+{{- end -}}
+{{- end -}}
+
+{{- define "tierClassloaderMaxRetries" }}
+{{- if gt (add .periodSeconds 0) 180 -}}
+{{- add (round (div (mul .periodSeconds .failureThreshold) 180) 0) 1 -}}
+{{- else -}}
+{{- add .failureThreshold 1 -}}
+{{- end -}}
+{{- end -}}

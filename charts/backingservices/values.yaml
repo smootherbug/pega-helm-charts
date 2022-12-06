@@ -5,7 +5,7 @@ global:
     username: "YOUR_DOCKER_REGISTRY_USERNAME"
     password: "YOUR_DOCKER_REGISTRY_PASSWORD"
 
-# srs-service configuration
+# Search and Reporting Service (SRS) Configuration
 srs:
   # always set srs.srsStorage.provisionInternalESCluster=false when srs.enabled=false
   enabled: true
@@ -16,7 +16,7 @@ srs:
   # Configure the location of the busybox image that is used during the deployment process of
   # the internal Elasticsearch cluster
   busybox:
-    image: "alpine:3.16.0"
+    image: "alpine:3.16.1"
     imagePullPolicy: "IfNotPresent"
 
   srsRuntime:
